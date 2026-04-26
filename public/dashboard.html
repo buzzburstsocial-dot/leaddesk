@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LeadDesk Dashboard</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --purple: #7c3aed;
+      --purple-dark: #6d28d9;
+      --purple-light: #ede9fe;
+      --text: #111827;
+      --muted: #6b7280;
+      --border: #e5e7eb;
+      --sidebar-w: 220px;
+    }
+    body { font-family: system-ui, -apple-system, sans-serif; color: var(--text); background: #f9fafb; display: flex; min-height: 100vh; }
+
+    /* Sidebar */
+    .sidebar {
+      width: var(--sidebar-w); background: #fff; border-right: 1px solid var(--border);
+      display: flex; flex-direction: column; padding: 24px 0; flex-shrink: 0; position: fixed; top: 0; left: 0; height: 100vh;
+    }
+    .sidebar-logo { font-size: 20px; font-weight: 800; color: var(--purple); padding: 0 20px 24px; border-bottom: 1px solid var(--border); }
+    .sidebar-nav { padding: 16px 12px; flex: 1; }
+    .nav-item {
+      display: flex; align-items: center; gap: 10px; padding: 10px 12px;
+      border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 500;
+      color: var(--muted); transition: all .15s; margin-bottom: 4px;
+    }
+    .nav-item:hover { background: var(--purple-light); color: var(--purple); }
+    .nav-item.active { background: var(--purple-light); color: var(--purple); font-weight: 600; }
+    .nav-icon { font-size: 16px; width: 20px; text-align: center; }
+
+    /* Main */
+    .main { margin-left: var(--sidebar-w); flex: 1; padding: 32px; max-width: 900px; }
+    .page-title { font-size: 22px; font-weight: 800; margin-bottom: 8px; }
+    .page-sub { font-size: 14px; color: var(--muted); margin-bottom: 28px; }
+
+    /* Cards / panels */
+    .card { background: #fff; border: 1px solid var(--border); border-radius: 14px; padding: 28px; margin-bottom: 20px; }
+    .card-title { font-size: 15px; font-weight: 700; margin-bottom: 16px; }
+
+    /* Form */
+    label { display: block; font-size: 13px; font-weight: 600; color: var(--muted); margin-bottom: 5px; }
+    input[type=text], input[type=email], textarea {
+      width: 100%; border: 1px solid var(--border); border-radius: 8px;
+      padding: 10px 12px; font-size: 14px; font-family: inherit; outline: none;
+      transition: border-color .15s; background: #fff; color: var(--text);
+    }
+    input[type=text]:focus, input[type=email]:focus, textarea:focus { border-color: var(--purple); }
+    textarea { resize: vertical; min-height: 90px; }
+    .form-group { margin-bottom: 18px; }
+    .btn {
+      background: var(--purple); color: #fff; border: none; border-radius: 8px;
+      padding: 10px 20px; font-size: 14px; font-weight: 600; cursor: pointer; transition: background .15s;
+    }
+    .btn:hover { background: var(--purple-dark); }
+    .btn:disabled { opacity: .5; cursor: default; }
+    .btn-danger { background: #dc2626; }
+    .btn-danger:hover { background: #b91c1c; }
+    .btn-sm { padding: 6px 12px; font-size: 13px; }
+
+    /* FAQs */
+    .faq-item {
+      border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; margin-bottom: 10px;
+      display: flex; gap: 12px; align-items: flex-start;
+    }
+    .faq-fields { flex: 1; display: flex; flex-direction: column; gap: 8px; }
+    .faq-remove { background: none; border: none; font-size: 18px; color: var(--muted); cursor: pointer; padding: 2px; flex-shrink: 0; }
+    .faq-remove:hover { color: #dc2626; }
+
+    /* Agent ID / embed section */
+    .agent-id-box {
+      background: var(--purple-light); border: 1px solid #c4b5fd; border-radius: 10px;
+      padding: 16px 20px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;
+    }
+    .agent-id-label { font-size: 12px; color: var(--purple); font-weight: 600; margin-bottom: 2px; }
+    .agent-id-value { font-family: monospace; font-size: 15px; font-weight: 700; color: var(--purple); }
+    .code-block {
+      background: #1e1b4b; border-radius: 10px; padding: 18px 20px;
+      font-family: monospace; font-size: 13px; color: #e9d5ff; line-height: 1.8;
+      white-space: pre-wrap; word-break: break-all;
+      position: relative;
+    }
+    .copy-btn {
+      position: absolute; top: 12px; right: 12px;
+      background: rgba(255,255,255,.12); border: none; border-radius: 6px;
+      padding: 5px 10px; color: #e9d5ff; font-size: 12px; cursor: pointer;
+    }
+    .copy-btn:hover { background: rgba(255,255,255,.2); }
+
+    /* Leads table */
+    .leads-empty { text-align: center; padding: 48px 24px; color: var(--muted); font-size: 14px; }
+    .leads-empty .emoji { font-size: 40px; margin-bottom: 12px; }
+    table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    th { text-align: left; padding: 10px 12px; font-size: 12px; font-weight: 600; color: var(--muted); border-bottom: 1px solid var(--border); }
+    td { padding: 12px 12px; border-bottom: 1px solid var(--border); vertical-align: top; }
+    tr:last-child td { border-bottom: none; }
+    .lead-name { font-weight: 600; }
+    .lead-email a { color: var(--purple); text-decoration: none; }
+    .lead-msg { color: var(--muted); max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .lead-time { color: var(--muted); font-size: 12px; white-space: nowrap; }
+
+    /* Toast */
+    .toast {
+      position: fixed; bottom: 24px; right: 24px; background: #111; color: #fff;
+      padding: 12px 20px; border-radius: 10px; font-size: 14px; font-weight: 500;
+      opacity: 0; transform: translateY(8px); transition: all .25s; pointer-events: none; z-index: 1000;
+    }
+    .toast.show { opacity: 1; transform: translateY(0); }
+
+    /* Tab panels */
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+  </style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sidebar-logo">LeadDesk</div>
+  <nav class="sidebar-nav">
+    <div class="nav-item active" data-tab="setup">
+      <span class="nav-icon">🏢</span> Business Setup
+    </div>
+    <div class="nav-item" data-tab="embed">
+      <span class="nav-icon">🔌</span> Widget &amp; Embed
+    </div>
+    <div class="nav-item" data-tab="leads">
+      <span class="nav-icon">📋</span> Leads <span id="lead-count-badge" style="margin-left:auto;background:var(--purple);color:#fff;border-radius:99px;padding:1px 7px;font-size:11px;display:none"></span>
+    </div>
+  </nav>
+</aside>
+
+<main class="main">
+
+  <!-- Business Setup -->
+  <div class="tab-panel active" id="tab-setup">
+    <div class="page-title">Business Setup</div>
+    <div class="page-sub">Tell your AI assistant about your business so it can answer visitor questions.</div>
+
+    <form id="config-form">
+      <div class="card">
+        <div class="card-title">Basic Info</div>
+        <div class="form-group">
+          <label for="businessName">Business Name</label>
+          <input type="text" id="businessName" placeholder="e.g. Precision Plumbing Co." />
+        </div>
+        <div class="form-group">
+          <label for="description">About Your Business</label>
+          <textarea id="description" placeholder="Describe what your business does, who you serve, your experience, etc."></textarea>
+        </div>
+        <div class="form-group">
+          <label for="services">Services &amp; Pricing</label>
+          <textarea id="services" placeholder="List your services and any pricing info you're comfortable sharing..."></textarea>
+        </div>
+        <div class="form-group">
+          <label for="notifyEmail">Lead Notification Email</label>
+          <input type="email" id="notifyEmail" placeholder="you@example.com" />
+          <div style="font-size:12px;color:var(--muted);margin-top:5px">You'll receive an email when a visitor becomes a lead.</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Frequently Asked Questions</div>
+        <div id="faqs-list"></div>
+        <button type="button" class="btn" style="background:#f3f4f6;color:var(--text);border:1px solid var(--border)" onclick="addFaq()">+ Add FAQ</button>
+      </div>
+
+      <button type="submit" class="btn" id="save-btn">Save Changes</button>
+    </form>
+  </div>
+
+  <!-- Widget & Embed -->
+  <div class="tab-panel" id="tab-embed">
+    <div class="page-title">Widget &amp; Embed</div>
+    <div class="page-sub">Add your AI chat widget to any website with one line of code.</div>
+
+    <div class="card">
+      <div class="card-title">Your Agent ID</div>
+      <div class="agent-id-box">
+        <div>
+          <div class="agent-id-label">AGENT ID</div>
+          <div class="agent-id-value" id="agent-id-display">Loading...</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Embed Code</div>
+      <p style="font-size:14px;color:var(--muted);margin-bottom:16px">
+        Copy and paste this single line into your website's HTML, just before the <code style="background:#f3f4f6;padding:2px 6px;border-radius:4px">&lt;/body&gt;</code> tag.
+      </p>
+      <div class="code-block" id="embed-code" style="position:relative">
+        <button class="copy-btn" onclick="copyEmbed()">Copy</button>
+        <span id="embed-code-text">Loading...</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Preview Your Widget</div>
+      <p style="font-size:14px;color:var(--muted);margin-bottom:16px">Test how your chat widget looks and feels. This uses your live business info.</p>
+      <button class="btn" onclick="openPreview()">Open Preview</button>
+    </div>
+  </div>
+
+  <!-- Leads -->
+  <div class="tab-panel" id="tab-leads">
+    <div class="page-title">Leads</div>
+    <div class="page-sub">Visitors who've expressed interest and shared their contact details.</div>
+
+    <div class="card" style="padding:0;overflow:hidden">
+      <div id="leads-container">
+        <div class="leads-empty">
+          <div class="emoji">📭</div>
+          <div>No leads yet — your widget is ready to capture them!</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  let config = {};
+
+  // Tab navigation
+  document.querySelectorAll('.nav-item').forEach(item => {
+    item.addEventListener('click', () => {
+      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+      document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+      item.classList.add('active');
+      document.getElementById('tab-' + item.dataset.tab).classList.add('active');
+    });
+  });
+
+  function toast(msg, ms = 2500) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), ms);
+  }
+
+  // Load config
+  async function loadConfig() {
+    const r = await fetch('/api/config');
+    config = await r.json();
+    document.getElementById('businessName').value = config.businessName || '';
+    document.getElementById('description').value = config.description || '';
+    document.getElementById('services').value = config.services || '';
+    document.getElementById('notifyEmail').value = config.notifyEmail || '';
+
+    // FAQs
+    document.getElementById('faqs-list').innerHTML = '';
+    (config.faqs || []).forEach(f => addFaq(f));
+
+    // Agent ID & embed code
+    const agentId = config.agentId || '';
+    document.getElementById('agent-id-display').textContent = agentId;
+    const origin = location.origin;
+    const embedSnippet = `<script src="${origin}/widget.js" data-agent="${agentId}"><\/script>`;
+    document.getElementById('embed-code-text').textContent = embedSnippet;
+
+    // Leads
+    renderLeads(config.leads || []);
+    updateLeadBadge(config.leads || []);
+  }
+
+  // FAQs
+  function addFaq(faq = {}) {
+    const list = document.getElementById('faqs-list');
+    const div = document.createElement('div');
+    div.className = 'faq-item';
+    div.innerHTML = `
+      <div class="faq-fields">
+        <input type="text" placeholder="Question" class="faq-q" value="${escHtml(faq.question || '')}" />
+        <textarea placeholder="Answer" class="faq-a" style="min-height:60px">${escHtml(faq.answer || '')}</textarea>
+      </div>
+      <button type="button" class="faq-remove" title="Remove">×</button>
+    `;
+    div.querySelector('.faq-remove').addEventListener('click', () => div.remove());
+    list.appendChild(div);
+  }
+
+  function escHtml(s) {
+    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  function collectFaqs() {
+    return Array.from(document.querySelectorAll('.faq-item')).map(div => ({
+      question: div.querySelector('.faq-q').value.trim(),
+      answer:   div.querySelector('.faq-a').value.trim(),
+    })).filter(f => f.question || f.answer);
+  }
+
+  // Save config
+  document.getElementById('config-form').addEventListener('submit', async e => {
+    e.preventDefault();
+    const btn = document.getElementById('save-btn');
+    btn.disabled = true; btn.textContent = 'Saving...';
+    try {
+      const r = await fetch('/api/config', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          businessName: document.getElementById('businessName').value.trim(),
+          description:  document.getElementById('description').value.trim(),
+          services:     document.getElementById('services').value.trim(),
+          notifyEmail:  document.getElementById('notifyEmail').value.trim(),
+          faqs:         collectFaqs(),
+        }),
+      });
+      config = await r.json();
+      toast('Changes saved!');
+    } catch { toast('Save failed — please try again.'); }
+    btn.disabled = false; btn.textContent = 'Save Changes';
+  });
+
+  // Embed
+  function copyEmbed() {
+    const text = document.getElementById('embed-code-text').textContent;
+    navigator.clipboard.writeText(text).then(() => toast('Copied to clipboard!')).catch(() => {
+      const ta = document.createElement('textarea');
+      ta.value = text; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove();
+      toast('Copied!');
+    });
+  }
+
+  function openPreview() {
+    const agentId = config.agentId || 'dev';
+    window.open(`/chat-frame?agentId=${agentId}`, '_blank', 'width=420,height=620');
+  }
+
+  // Leads
+  function renderLeads(leads) {
+    const c = document.getElementById('leads-container');
+    if (!leads.length) {
+      c.innerHTML = '<div class="leads-empty"><div class="emoji">📭</div><div>No leads yet — your widget is ready to capture them!</div></div>';
+      return;
+    }
+    c.innerHTML = `
+      <table>
+        <thead><tr>
+          <th>Name</th><th>Email</th><th>Message</th><th>Date</th><th></th>
+        </tr></thead>
+        <tbody>
+          ${leads.map(l => `
+            <tr data-id="${l.id}">
+              <td class="lead-name">${escHtml(l.name)}</td>
+              <td class="lead-email"><a href="mailto:${escHtml(l.email)}">${escHtml(l.email)}</a></td>
+              <td class="lead-msg" title="${escHtml(l.message)}">${escHtml(l.message)}</td>
+              <td class="lead-time">${formatDate(l.timestamp)}</td>
+              <td><button class="btn btn-danger btn-sm" onclick="deleteLead('${l.id}')">Delete</button></td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    `;
+  }
+
+  function updateLeadBadge(leads) {
+    const badge = document.getElementById('lead-count-badge');
+    if (leads.length > 0) {
+      badge.textContent = leads.length;
+      badge.style.display = '';
+    } else {
+      badge.style.display = 'none';
+    }
+  }
+
+  function formatDate(iso) {
+    const d = new Date(iso);
+    return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) + ' ' +
+           d.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+  }
+
+  async function deleteLead(id) {
+    if (!confirm('Delete this lead?')) return;
+    await fetch(`/api/leads/${id}`, { method: 'DELETE' });
+    config.leads = (config.leads || []).filter(l => l.id !== id);
+    renderLeads(config.leads);
+    updateLeadBadge(config.leads);
+    toast('Lead deleted');
+  }
+
+  loadConfig();
+</script>
+
+</body>
+</html>
