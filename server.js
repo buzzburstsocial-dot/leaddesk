@@ -255,6 +255,39 @@ app.delete('/api/leads/:id', requireAuth, (req, res) => {
   res.json({ ok: true });
 });
 
+// ── FAQ generator ────────────────────────────────────────────────────────────
+app.post('/api/generate-faqs', requireAuth, async (req, res) => {
+  const { businessName, description, services } = req.body;
+  if (!businessName?.trim() && !description?.trim()) {
+    return res.status(400).json({ error: 'Provide at least a business name or description.' });
+  }
+  let context = '';
+  if (businessName) context += `Business name: ${businessName}\n`;
+  if (description)  context += `Description: ${description}\n`;
+  if (services)     context += `Services: ${services}\n`;
+
+  try {
+    const msg = await client.messages.create({
+      model: 'claude-opus-4-7',
+      max_tokens: 1024,
+      system: 'You are a helpful assistant that generates FAQ content for small service businesses. Always respond with valid JSON only — no prose, no markdown fences.',
+      messages: [{
+        role: 'user',
+        content: `Generate 5 to 7 frequently asked questions with concise, helpful answers for this business:\n\n${context}\nReturn a JSON array of objects with "question" and "answer" keys. Example format: [{"question":"...","answer":"..."}]`,
+      }],
+    });
+    const text = msg.content[0].text.trim();
+    const start = text.indexOf('[');
+    const end   = text.lastIndexOf(']');
+    if (start === -1 || end === -1) throw new Error('No JSON array in response');
+    const faqs = JSON.parse(text.slice(start, end + 1));
+    res.json({ faqs });
+  } catch (err) {
+    console.error('FAQ generation error:', err.message);
+    res.status(500).json({ error: 'Failed to generate FAQs. Please try again.' });
+  }
+});
+
 // ── Public agent info ────────────────────────────────────────────────────────
 app.get('/api/agent/:agentId', (req, res) => {
   const config = getConfigByAgentId(req.params.agentId);

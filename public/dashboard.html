@@ -163,7 +163,15 @@
       </div>
 
       <div class="card">
-        <div class="card-title">Frequently Asked Questions</div>
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:16px">
+          <div class="card-title" style="margin-bottom:0">Frequently Asked Questions</div>
+          <button type="button" class="btn" id="gen-btn" onclick="generateFaqs()" style="display:flex;align-items:center;gap:7px;font-size:13px;padding:8px 16px">
+            <span id="gen-icon">✨</span> Generate FAQs with AI
+          </button>
+        </div>
+        <div id="gen-hint" style="font-size:13px;color:var(--muted);margin-bottom:14px;display:none">
+          Fill in your business name and description above, then click Generate.
+        </div>
         <div id="faqs-list"></div>
         <button type="button" class="btn" style="background:#f3f4f6;color:var(--text);border:1px solid var(--border)" onclick="addFaq()">+ Add FAQ</button>
       </div>
@@ -384,6 +392,46 @@
     renderLeads(config.leads);
     updateLeadBadge(config.leads);
     toast('Lead deleted');
+  }
+
+  // Generate FAQs with AI
+  async function generateFaqs() {
+    const businessName = document.getElementById('businessName').value.trim();
+    const description  = document.getElementById('description').value.trim();
+    const services     = document.getElementById('services').value.trim();
+
+    if (!businessName && !description) {
+      document.getElementById('gen-hint').style.display = '';
+      return;
+    }
+    document.getElementById('gen-hint').style.display = 'none';
+
+    const btn = document.getElementById('gen-btn');
+    const icon = document.getElementById('gen-icon');
+    btn.disabled = true;
+    icon.textContent = '⏳';
+    btn.childNodes[1].textContent = ' Generating…';
+
+    try {
+      const r = await fetch('/api/generate-faqs', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ businessName, description, services }),
+      });
+      const data = await r.json();
+      if (data.error) throw new Error(data.error);
+
+      // Clear existing FAQs and populate with generated ones
+      document.getElementById('faqs-list').innerHTML = '';
+      (data.faqs || []).forEach(f => addFaq(f));
+      toast(`Generated ${data.faqs.length} FAQs — edit and save when ready!`, 3500);
+    } catch (err) {
+      toast(err.message || 'Generation failed — please try again.');
+    }
+
+    btn.disabled = false;
+    icon.textContent = '✨';
+    btn.childNodes[1].textContent = ' Generate FAQs with AI';
   }
 
   loadConfig();
