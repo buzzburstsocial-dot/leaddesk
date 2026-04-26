@@ -4,236 +4,428 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>LeadDesk Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
     :root {
-      --purple: #7c3aed;
-      --purple-dark: #6d28d9;
-      --purple-light: #ede9fe;
-      --text: #111827;
-      --muted: #6b7280;
-      --border: #e5e7eb;
-      --sidebar-w: 220px;
+      --bg:       #07070a;
+      --sidebar:  #0a0a0e;
+      --surface:  #0f0f14;
+      --card:     #131318;
+      --input:    #0d0d12;
+      --border:   rgba(255,255,255,0.07);
+      --border2:  rgba(255,255,255,0.04);
+      --text:     #e8e8ed;
+      --muted:    #5a5a70;
+      --soft:     #8888a0;
+      --accent:   #8b5cf6;
+      --accent2:  #6366f1;
+      --glow:     rgba(139,92,246,0.2);
+      --sidebar-w: 216px;
     }
-    body { font-family: system-ui, -apple-system, sans-serif; color: var(--text); background: #f9fafb; display: flex; min-height: 100vh; }
 
-    /* Sidebar */
+    html, body { height: 100%; }
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: var(--bg); color: var(--text);
+      -webkit-font-smoothing: antialiased;
+      display: flex; min-height: 100vh;
+    }
+
+    /* ── Sidebar ────────────────────────────────────────────────────────────── */
     .sidebar {
-      width: var(--sidebar-w); background: #fff; border-right: 1px solid var(--border);
-      display: flex; flex-direction: column; padding: 24px 0; flex-shrink: 0; position: fixed; top: 0; left: 0; height: 100vh;
+      width: var(--sidebar-w); flex-shrink: 0;
+      background: var(--sidebar); border-right: 1px solid var(--border);
+      display: flex; flex-direction: column;
+      position: fixed; top: 0; left: 0; height: 100vh;
+      z-index: 50;
     }
-    .sidebar-logo { font-size: 20px; font-weight: 800; color: var(--purple); padding: 0 20px 24px; border-bottom: 1px solid var(--border); }
-    .sidebar-nav { padding: 16px 12px; flex: 1; }
+    .sidebar-top {
+      padding: 20px 18px 16px;
+      border-bottom: 1px solid var(--border);
+    }
+    .logo {
+      font-size: 15px; font-weight: 700; letter-spacing: -0.4px;
+      background: linear-gradient(120deg, #fff 20%, #a78bfa 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .sidebar-section { padding: 12px 10px; flex: 1; }
+    .sidebar-label {
+      font-size: 10px; font-weight: 600; letter-spacing: 0.1em;
+      text-transform: uppercase; color: var(--muted);
+      padding: 4px 8px 8px;
+    }
     .nav-item {
-      display: flex; align-items: center; gap: 10px; padding: 10px 12px;
-      border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 500;
-      color: var(--muted); transition: all .15s; margin-bottom: 4px;
+      display: flex; align-items: center; gap: 9px;
+      padding: 8px 10px; border-radius: 7px; cursor: pointer;
+      font-size: 13px; font-weight: 500; color: var(--muted);
+      transition: background .15s, color .15s; margin-bottom: 2px;
     }
-    .nav-item:hover { background: var(--purple-light); color: var(--purple); }
-    .nav-item.active { background: var(--purple-light); color: var(--purple); font-weight: 600; }
-    .nav-icon { font-size: 16px; width: 20px; text-align: center; }
-
-    /* Main */
-    .main { margin-left: var(--sidebar-w); flex: 1; padding: 32px; max-width: 900px; }
-    .page-title { font-size: 22px; font-weight: 800; margin-bottom: 8px; }
-    .page-sub { font-size: 14px; color: var(--muted); margin-bottom: 28px; }
-
-    /* Cards / panels */
-    .card { background: #fff; border: 1px solid var(--border); border-radius: 14px; padding: 28px; margin-bottom: 20px; }
-    .card-title { font-size: 15px; font-weight: 700; margin-bottom: 16px; }
-
-    /* Form */
-    label { display: block; font-size: 13px; font-weight: 600; color: var(--muted); margin-bottom: 5px; }
-    input[type=text], input[type=email], textarea {
-      width: 100%; border: 1px solid var(--border); border-radius: 8px;
-      padding: 10px 12px; font-size: 14px; font-family: inherit; outline: none;
-      transition: border-color .15s; background: #fff; color: var(--text);
+    .nav-item:hover { background: rgba(255,255,255,0.04); color: var(--soft); }
+    .nav-item.active {
+      background: rgba(139,92,246,0.12);
+      color: #c4b5fd;
     }
-    input[type=text]:focus, input[type=email]:focus, textarea:focus { border-color: var(--purple); }
-    textarea { resize: vertical; min-height: 90px; }
-    .form-group { margin-bottom: 18px; }
-    .btn {
-      background: var(--purple); color: #fff; border: none; border-radius: 8px;
-      padding: 10px 20px; font-size: 14px; font-weight: 600; cursor: pointer; transition: background .15s;
+    .nav-icon { font-size: 13px; width: 18px; text-align: center; opacity: .8; flex-shrink: 0; }
+    .nav-badge {
+      margin-left: auto; background: var(--accent); color: #fff;
+      border-radius: 99px; padding: 1px 7px; font-size: 10px; font-weight: 700;
+      display: none;
     }
-    .btn:hover { background: var(--purple-dark); }
-    .btn:disabled { opacity: .5; cursor: default; }
-    .btn-danger { background: #dc2626; }
-    .btn-danger:hover { background: #b91c1c; }
-    .btn-sm { padding: 6px 12px; font-size: 13px; }
+    .sidebar-footer {
+      padding: 14px 18px;
+      border-top: 1px solid var(--border);
+      font-size: 11px; color: var(--muted);
+    }
+    .sidebar-footer strong { display: block; color: var(--soft); font-size: 12px; margin-bottom: 2px; }
 
-    /* FAQs */
-    .faq-item {
-      border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; margin-bottom: 10px;
-      display: flex; gap: 12px; align-items: flex-start;
-    }
-    .faq-fields { flex: 1; display: flex; flex-direction: column; gap: 8px; }
-    .faq-remove { background: none; border: none; font-size: 18px; color: var(--muted); cursor: pointer; padding: 2px; flex-shrink: 0; }
-    .faq-remove:hover { color: #dc2626; }
+    /* ── Main ───────────────────────────────────────────────────────────────── */
+    .main { margin-left: var(--sidebar-w); flex: 1; min-height: 100vh; display: flex; flex-direction: column; }
 
-    /* Agent ID / embed section */
-    .agent-id-box {
-      background: var(--purple-light); border: 1px solid #c4b5fd; border-radius: 10px;
-      padding: 16px 20px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;
+    .topbar {
+      height: 52px; border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; padding: 0 32px;
+      background: rgba(7,7,10,0.8); backdrop-filter: blur(16px);
+      position: sticky; top: 0; z-index: 40;
     }
-    .agent-id-label { font-size: 12px; color: var(--purple); font-weight: 600; margin-bottom: 2px; }
-    .agent-id-value { font-family: monospace; font-size: 15px; font-weight: 700; color: var(--purple); }
-    .code-block {
-      background: #1e1b4b; border-radius: 10px; padding: 18px 20px;
-      font-family: monospace; font-size: 13px; color: #e9d5ff; line-height: 1.8;
-      white-space: pre-wrap; word-break: break-all;
-      position: relative;
-    }
-    .copy-btn {
-      position: absolute; top: 12px; right: 12px;
-      background: rgba(255,255,255,.12); border: none; border-radius: 6px;
-      padding: 5px 10px; color: #e9d5ff; font-size: 12px; cursor: pointer;
-    }
-    .copy-btn:hover { background: rgba(255,255,255,.2); }
+    .topbar-title { font-size: 14px; font-weight: 600; color: var(--text); }
+    .topbar-sub { font-size: 12px; color: var(--muted); margin-left: 8px; }
 
-    /* Leads table */
-    .leads-empty { text-align: center; padding: 48px 24px; color: var(--muted); font-size: 14px; }
-    .leads-empty .emoji { font-size: 40px; margin-bottom: 12px; }
-    table { width: 100%; border-collapse: collapse; font-size: 14px; }
-    th { text-align: left; padding: 10px 12px; font-size: 12px; font-weight: 600; color: var(--muted); border-bottom: 1px solid var(--border); }
-    td { padding: 12px 12px; border-bottom: 1px solid var(--border); vertical-align: top; }
-    tr:last-child td { border-bottom: none; }
-    .lead-name { font-weight: 600; }
-    .lead-email a { color: var(--purple); text-decoration: none; }
-    .lead-msg { color: var(--muted); max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .lead-time { color: var(--muted); font-size: 12px; white-space: nowrap; }
+    .content { padding: 28px 32px; flex: 1; max-width: 860px; }
 
-    /* Toast */
-    .toast {
-      position: fixed; bottom: 24px; right: 24px; background: #111; color: #fff;
-      padding: 12px 20px; border-radius: 10px; font-size: 14px; font-weight: 500;
-      opacity: 0; transform: translateY(8px); transition: all .25s; pointer-events: none; z-index: 1000;
-    }
-    .toast.show { opacity: 1; transform: translateY(0); }
-
-    /* Tab panels */
+    /* ── Tab panels ─────────────────────────────────────────────────────────── */
     .tab-panel { display: none; }
     .tab-panel.active { display: block; }
+
+    /* ── Cards ──────────────────────────────────────────────────────────────── */
+    .card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 12px; padding: 24px; margin-bottom: 16px;
+    }
+    .card-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 20px; gap: 12px; flex-wrap: wrap;
+    }
+    .card-title { font-size: 13px; font-weight: 600; color: var(--text); }
+    .card-sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+    /* ── Form elements ──────────────────────────────────────────────────────── */
+    .form-group { margin-bottom: 18px; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    label {
+      display: block; font-size: 11px; font-weight: 600;
+      letter-spacing: 0.04em; color: var(--soft);
+      margin-bottom: 6px; text-transform: uppercase;
+    }
+    input[type=text], input[type=email], textarea {
+      width: 100%; background: var(--input); border: 1px solid var(--border);
+      border-radius: 8px; padding: 9px 12px; font-size: 13px;
+      font-family: inherit; color: var(--text); outline: none;
+      transition: border-color .15s, box-shadow .15s;
+      resize: vertical;
+    }
+    input[type=text]:focus, input[type=email]:focus, textarea:focus {
+      border-color: rgba(139,92,246,0.5);
+      box-shadow: 0 0 0 3px rgba(139,92,246,0.08);
+    }
+    input::placeholder, textarea::placeholder { color: var(--muted); }
+    textarea { min-height: 84px; line-height: 1.55; }
+    .field-hint { font-size: 11px; color: var(--muted); margin-top: 5px; }
+
+    /* ── Buttons ────────────────────────────────────────────────────────────── */
+    .btn {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: rgba(255,255,255,0.06); color: var(--soft);
+      border: 1px solid var(--border); border-radius: 7px;
+      padding: 8px 14px; font-size: 12px; font-weight: 500;
+      cursor: pointer; font-family: inherit;
+      transition: background .15s, border-color .15s, color .15s;
+    }
+    .btn:hover { background: rgba(255,255,255,0.09); border-color: rgba(255,255,255,0.12); color: var(--text); }
+    .btn:disabled { opacity: .4; cursor: default; }
+    .btn-accent {
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color: #fff; border: none;
+      box-shadow: 0 0 0 1px rgba(139,92,246,0.3);
+    }
+    .btn-accent:hover { opacity: .88; box-shadow: 0 0 16px var(--glow); color: #fff; }
+    .btn-save {
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color: #fff; border: none; border-radius: 8px;
+      padding: 9px 20px; font-size: 13px; font-weight: 600;
+      cursor: pointer; font-family: inherit;
+      transition: opacity .15s, box-shadow .2s;
+      box-shadow: 0 0 20px var(--glow);
+    }
+    .btn-save:hover { opacity: .88; box-shadow: 0 0 28px rgba(139,92,246,0.35); }
+    .btn-save:disabled { opacity: .45; cursor: default; }
+    .btn-danger {
+      background: rgba(220,38,38,0.08); color: #f87171;
+      border: 1px solid rgba(220,38,38,0.15);
+    }
+    .btn-danger:hover { background: rgba(220,38,38,0.14); border-color: rgba(220,38,38,0.25); color: #fca5a5; }
+
+    /* ── FAQ items ──────────────────────────────────────────────────────────── */
+    .faq-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px; }
+    .faq-item {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 9px; padding: 12px 14px;
+      display: flex; gap: 12px; align-items: flex-start;
+      transition: border-color .15s;
+    }
+    .faq-item:hover { border-color: rgba(255,255,255,0.1); }
+    .faq-fields { flex: 1; display: flex; flex-direction: column; gap: 6px; }
+    .faq-fields input, .faq-fields textarea {
+      background: var(--input); border-color: var(--border2); font-size: 12px;
+    }
+    .faq-fields textarea { min-height: 56px; }
+    .faq-remove {
+      background: none; border: none; color: var(--muted); font-size: 16px;
+      cursor: pointer; padding: 2px 4px; flex-shrink: 0; line-height: 1;
+      transition: color .15s;
+    }
+    .faq-remove:hover { color: #f87171; }
+
+    /* ── Agent ID / embed ───────────────────────────────────────────────────── */
+    .agent-id-row {
+      display: flex; align-items: center; gap: 12px;
+      background: rgba(139,92,246,0.07); border: 1px solid rgba(139,92,246,0.15);
+      border-radius: 9px; padding: 14px 16px;
+    }
+    .agent-id-icon { font-size: 18px; flex-shrink: 0; }
+    .agent-id-label { font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #a78bfa; margin-bottom: 2px; }
+    .agent-id-val { font-family: 'Courier New', monospace; font-size: 14px; font-weight: 600; color: #c4b5fd; }
+    .code-block {
+      background: #0a0a0f; border: 1px solid rgba(139,92,246,0.15);
+      border-radius: 10px; overflow: hidden; position: relative;
+    }
+    .code-bar {
+      background: #0e0e14; border-bottom: 1px solid rgba(255,255,255,0.05);
+      padding: 9px 14px; display: flex; align-items: center; justify-content: space-between;
+    }
+    .code-bar-dots { display: flex; gap: 5px; }
+    .code-dot { width: 9px; height: 9px; border-radius: 50%; }
+    .d-r{background:#ff5f57;} .d-y{background:#febc2e;} .d-g{background:#28c840;}
+    .code-filename { font-size: 11px; color: var(--muted); font-family: monospace; }
+    .code-body { padding: 16px 18px; font-family: 'Courier New', monospace; font-size: 12px; line-height: 1.8; color: #a78bfa; white-space: pre-wrap; word-break: break-all; }
+    .copy-btn {
+      display: inline-flex; align-items: center; gap: 5px;
+      background: rgba(139,92,246,0.12); border: 1px solid rgba(139,92,246,0.2);
+      color: #a78bfa; font-size: 11px; font-weight: 500;
+      padding: 5px 10px; border-radius: 6px; cursor: pointer; font-family: inherit;
+      transition: background .15s;
+    }
+    .copy-btn:hover { background: rgba(139,92,246,0.2); }
+
+    /* ── Leads table ────────────────────────────────────────────────────────── */
+    .leads-empty {
+      padding: 56px 24px; text-align: center; color: var(--muted); font-size: 13px;
+    }
+    .leads-empty-icon { font-size: 32px; margin-bottom: 12px; opacity: .4; }
+    .leads-empty p { line-height: 1.6; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    thead tr { border-bottom: 1px solid var(--border); }
+    th {
+      text-align: left; padding: 10px 14px;
+      font-size: 10px; font-weight: 700; letter-spacing: 0.08em;
+      text-transform: uppercase; color: var(--muted);
+    }
+    td { padding: 13px 14px; border-bottom: 1px solid var(--border2); vertical-align: top; }
+    tbody tr:last-child td { border-bottom: none; }
+    tbody tr { transition: background .15s; }
+    tbody tr:hover { background: rgba(255,255,255,0.02); }
+    .lead-name { font-weight: 600; font-size: 13px; }
+    .lead-email a { color: var(--accent); text-decoration: none; font-size: 12px; }
+    .lead-email a:hover { color: #c4b5fd; }
+    .lead-msg { color: var(--muted); font-size: 12px; max-width: 260px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .lead-time { color: var(--muted); font-size: 11px; white-space: nowrap; }
+
+    /* ── Toast ──────────────────────────────────────────────────────────────── */
+    .toast {
+      position: fixed; bottom: 20px; right: 20px; z-index: 999;
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 9px; padding: 11px 18px;
+      font-size: 13px; font-weight: 500; color: var(--text);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+      opacity: 0; transform: translateY(6px);
+      transition: opacity .2s, transform .2s; pointer-events: none;
+    }
+    .toast.show { opacity: 1; transform: translateY(0); }
   </style>
 </head>
 <body>
 
+<!-- Sidebar -->
 <aside class="sidebar">
-  <div class="sidebar-logo">LeadDesk</div>
-  <nav class="sidebar-nav">
+  <div class="sidebar-top">
+    <div class="logo">LeadDesk</div>
+  </div>
+  <div class="sidebar-section">
+    <div class="sidebar-label">Workspace</div>
     <div class="nav-item active" data-tab="setup">
-      <span class="nav-icon">🏢</span> Business Setup
+      <span class="nav-icon">⚙</span> Business Setup
     </div>
     <div class="nav-item" data-tab="embed">
-      <span class="nav-icon">🔌</span> Widget &amp; Embed
+      <span class="nav-icon">◈</span> Widget &amp; Embed
     </div>
     <div class="nav-item" data-tab="leads">
-      <span class="nav-icon">📋</span> Leads <span id="lead-count-badge" style="margin-left:auto;background:var(--purple);color:#fff;border-radius:99px;padding:1px 7px;font-size:11px;display:none"></span>
+      <span class="nav-icon">◎</span> Leads
+      <span class="nav-badge" id="lead-count-badge"></span>
     </div>
-  </nav>
+  </div>
+  <div class="sidebar-footer">
+    <strong>LeadDesk Pro</strong>
+    7-day trial active
+  </div>
 </aside>
 
-<main class="main">
+<!-- Main -->
+<div class="main">
 
-  <!-- Business Setup -->
-  <div class="tab-panel active" id="tab-setup">
-    <div class="page-title">Business Setup</div>
-    <div class="page-sub">Tell your AI assistant about your business so it can answer visitor questions.</div>
+  <div class="topbar">
+    <span class="topbar-title" id="topbar-title">Business Setup</span>
+    <span class="topbar-sub" id="topbar-sub">Configure your AI assistant</span>
+  </div>
 
-    <form id="config-form">
+  <div class="content">
+
+    <!-- ── Setup ─────────────────────────────────────────────────────────── -->
+    <div class="tab-panel active" id="tab-setup">
+      <form id="config-form">
+
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">Basic Info</div>
+              <div class="card-sub">This powers your AI assistant's knowledge about your business</div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="businessName">Business Name</label>
+            <input type="text" id="businessName" placeholder="e.g. Precision Plumbing Co." />
+          </div>
+          <div class="form-group">
+            <label for="description">About Your Business</label>
+            <textarea id="description" rows="4" placeholder="Describe what you do, who you serve, your experience, service area, etc."></textarea>
+          </div>
+          <div class="form-group">
+            <label for="services">Services &amp; Pricing</label>
+            <textarea id="services" rows="3" placeholder="List your services and pricing info you're comfortable sharing publicly..."></textarea>
+          </div>
+          <div class="form-group" style="margin-bottom:0">
+            <label for="notifyEmail">Lead Notification Email</label>
+            <input type="email" id="notifyEmail" placeholder="you@example.com" />
+            <div class="field-hint">You'll receive an email the moment a visitor becomes a lead.</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">Frequently Asked Questions</div>
+              <div class="card-sub">Your AI will use these to answer visitor questions</div>
+            </div>
+            <button type="button" class="btn btn-accent" id="gen-btn" onclick="generateFaqs()">
+              <span id="gen-icon">✦</span> <span id="gen-label">Generate with AI</span>
+            </button>
+          </div>
+          <div id="gen-hint" style="font-size:12px;color:var(--muted);margin-bottom:12px;padding:10px 12px;background:rgba(139,92,246,0.06);border:1px solid rgba(139,92,246,0.12);border-radius:8px;display:none">
+            Add your business name and description first, then generate FAQs.
+          </div>
+          <div class="faq-list" id="faqs-list"></div>
+          <button type="button" class="btn" onclick="addFaq()" style="font-size:12px">+ Add FAQ</button>
+        </div>
+
+        <div style="display:flex;justify-content:flex-end">
+          <button type="submit" class="btn-save" id="save-btn">Save changes</button>
+        </div>
+
+      </form>
+    </div>
+
+    <!-- ── Embed ──────────────────────────────────────────────────────────── -->
+    <div class="tab-panel" id="tab-embed">
+
       <div class="card">
-        <div class="card-title">Basic Info</div>
-        <div class="form-group">
-          <label for="businessName">Business Name</label>
-          <input type="text" id="businessName" placeholder="e.g. Precision Plumbing Co." />
+        <div class="card-header">
+          <div>
+            <div class="card-title">Agent ID</div>
+            <div class="card-sub">Your unique identifier for the chat widget</div>
+          </div>
         </div>
-        <div class="form-group">
-          <label for="description">About Your Business</label>
-          <textarea id="description" placeholder="Describe what your business does, who you serve, your experience, etc."></textarea>
-        </div>
-        <div class="form-group">
-          <label for="services">Services &amp; Pricing</label>
-          <textarea id="services" placeholder="List your services and any pricing info you're comfortable sharing..."></textarea>
-        </div>
-        <div class="form-group">
-          <label for="notifyEmail">Lead Notification Email</label>
-          <input type="email" id="notifyEmail" placeholder="you@example.com" />
-          <div style="font-size:12px;color:var(--muted);margin-top:5px">You'll receive an email when a visitor becomes a lead.</div>
+        <div class="agent-id-row">
+          <div class="agent-id-icon">◈</div>
+          <div>
+            <div class="agent-id-label">Agent ID</div>
+            <div class="agent-id-val" id="agent-id-display">Loading…</div>
+          </div>
         </div>
       </div>
 
       <div class="card">
-        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:16px">
-          <div class="card-title" style="margin-bottom:0">Frequently Asked Questions</div>
-          <button type="button" class="btn" id="gen-btn" onclick="generateFaqs()" style="display:flex;align-items:center;gap:7px;font-size:13px;padding:8px 16px">
-            <span id="gen-icon">✨</span> Generate FAQs with AI
-          </button>
+        <div class="card-header">
+          <div>
+            <div class="card-title">Embed Code</div>
+            <div class="card-sub">Paste this before the <code style="font-size:11px;color:var(--muted)">&lt;/body&gt;</code> tag on any page</div>
+          </div>
+          <button class="copy-btn" onclick="copyEmbed()">⌘ Copy</button>
         </div>
-        <div id="gen-hint" style="font-size:13px;color:var(--muted);margin-bottom:14px;display:none">
-          Fill in your business name and description above, then click Generate.
+        <div class="code-block">
+          <div class="code-bar">
+            <div class="code-bar-dots">
+              <div class="code-dot d-r"></div>
+              <div class="code-dot d-y"></div>
+              <div class="code-dot d-g"></div>
+            </div>
+            <span class="code-filename">index.html</span>
+          </div>
+          <div class="code-body" id="embed-code-text">Loading…</div>
         </div>
-        <div id="faqs-list"></div>
-        <button type="button" class="btn" style="background:#f3f4f6;color:var(--text);border:1px solid var(--border)" onclick="addFaq()">+ Add FAQ</button>
       </div>
 
-      <button type="submit" class="btn" id="save-btn">Save Changes</button>
-    </form>
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Preview Widget</div>
+            <div class="card-sub">See exactly how your chat widget looks and responds</div>
+          </div>
+          <button class="btn" onclick="openPreview()">Open preview →</button>
+        </div>
+        <p style="font-size:12px;color:var(--muted);line-height:1.6">
+          This opens a live preview using your saved business info. Make sure to save your changes first.
+        </p>
+      </div>
+
+    </div>
+
+    <!-- ── Leads ──────────────────────────────────────────────────────────── -->
+    <div class="tab-panel" id="tab-leads">
+      <div class="card" style="padding:0;overflow:hidden">
+        <div id="leads-container">
+          <div class="leads-empty">
+            <div class="leads-empty-icon">◎</div>
+            <p>No leads yet.<br>Your widget is live and ready to capture them.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
   </div>
-
-  <!-- Widget & Embed -->
-  <div class="tab-panel" id="tab-embed">
-    <div class="page-title">Widget &amp; Embed</div>
-    <div class="page-sub">Add your AI chat widget to any website with one line of code.</div>
-
-    <div class="card">
-      <div class="card-title">Your Agent ID</div>
-      <div class="agent-id-box">
-        <div>
-          <div class="agent-id-label">AGENT ID</div>
-          <div class="agent-id-value" id="agent-id-display">Loading...</div>
-        </div>
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="card-title">Embed Code</div>
-      <p style="font-size:14px;color:var(--muted);margin-bottom:16px">
-        Copy and paste this single line into your website's HTML, just before the <code style="background:#f3f4f6;padding:2px 6px;border-radius:4px">&lt;/body&gt;</code> tag.
-      </p>
-      <div class="code-block" id="embed-code" style="position:relative">
-        <button class="copy-btn" onclick="copyEmbed()">Copy</button>
-        <span id="embed-code-text">Loading...</span>
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="card-title">Preview Your Widget</div>
-      <p style="font-size:14px;color:var(--muted);margin-bottom:16px">Test how your chat widget looks and feels. This uses your live business info.</p>
-      <button class="btn" onclick="openPreview()">Open Preview</button>
-    </div>
-  </div>
-
-  <!-- Leads -->
-  <div class="tab-panel" id="tab-leads">
-    <div class="page-title">Leads</div>
-    <div class="page-sub">Visitors who've expressed interest and shared their contact details.</div>
-
-    <div class="card" style="padding:0;overflow:hidden">
-      <div id="leads-container">
-        <div class="leads-empty">
-          <div class="emoji">📭</div>
-          <div>No leads yet — your widget is ready to capture them!</div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-</main>
+</div>
 
 <div class="toast" id="toast"></div>
 
 <script>
   let config = {};
+
+  const tabTitles = {
+    setup: ['Business Setup', 'Configure your AI assistant'],
+    embed: ['Widget & Embed', 'Get your one-line embed code'],
+    leads: ['Leads', 'Contacts captured by your widget'],
+  };
 
   // Tab navigation
   document.querySelectorAll('.nav-item').forEach(item => {
@@ -241,15 +433,22 @@
       document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
       document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
       item.classList.add('active');
-      document.getElementById('tab-' + item.dataset.tab).classList.add('active');
+      const tab = item.dataset.tab;
+      document.getElementById('tab-' + tab).classList.add('active');
+      document.getElementById('topbar-title').textContent = tabTitles[tab][0];
+      document.getElementById('topbar-sub').textContent = tabTitles[tab][1];
     });
   });
 
-  function toast(msg, ms = 2500) {
+  function toast(msg, ms = 2800) {
     const t = document.getElementById('toast');
     t.textContent = msg;
     t.classList.add('show');
     setTimeout(() => t.classList.remove('show'), ms);
+  }
+
+  function escHtml(s) {
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   }
 
   // Load config
@@ -257,24 +456,21 @@
     const r = await fetch('/api/config');
     config = await r.json();
     document.getElementById('businessName').value = config.businessName || '';
-    document.getElementById('description').value = config.description || '';
-    document.getElementById('services').value = config.services || '';
-    document.getElementById('notifyEmail').value = config.notifyEmail || '';
+    document.getElementById('description').value  = config.description  || '';
+    document.getElementById('services').value     = config.services     || '';
+    document.getElementById('notifyEmail').value  = config.notifyEmail  || '';
 
-    // FAQs
     document.getElementById('faqs-list').innerHTML = '';
     (config.faqs || []).forEach(f => addFaq(f));
 
-    // Agent ID & embed code
     const agentId = config.agentId || '';
     document.getElementById('agent-id-display').textContent = agentId;
     const origin = location.origin;
-    const embedSnippet = `<script src="${origin}/widget.js" data-agent="${agentId}"><\/script>`;
-    document.getElementById('embed-code-text').textContent = embedSnippet;
+    document.getElementById('embed-code-text').textContent =
+      `<script src="${origin}/widget.js"\n  data-agent="${agentId}"><\/script>`;
 
-    // Leads
     renderLeads(config.leads || []);
-    updateLeadBadge(config.leads || []);
+    updateBadge(config.leads || []);
   }
 
   // FAQs
@@ -285,30 +481,27 @@
     div.innerHTML = `
       <div class="faq-fields">
         <input type="text" placeholder="Question" class="faq-q" value="${escHtml(faq.question || '')}" />
-        <textarea placeholder="Answer" class="faq-a" style="min-height:60px">${escHtml(faq.answer || '')}</textarea>
+        <textarea class="faq-a" placeholder="Answer" rows="2">${escHtml(faq.answer || '')}</textarea>
       </div>
       <button type="button" class="faq-remove" title="Remove">×</button>
     `;
     div.querySelector('.faq-remove').addEventListener('click', () => div.remove());
     list.appendChild(div);
-  }
-
-  function escHtml(s) {
-    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    if (!faq.question) div.querySelector('.faq-q').focus();
   }
 
   function collectFaqs() {
-    return Array.from(document.querySelectorAll('.faq-item')).map(div => ({
-      question: div.querySelector('.faq-q').value.trim(),
-      answer:   div.querySelector('.faq-a').value.trim(),
+    return Array.from(document.querySelectorAll('.faq-item')).map(d => ({
+      question: d.querySelector('.faq-q').value.trim(),
+      answer:   d.querySelector('.faq-a').value.trim(),
     })).filter(f => f.question || f.answer);
   }
 
-  // Save config
+  // Save
   document.getElementById('config-form').addEventListener('submit', async e => {
     e.preventDefault();
     const btn = document.getElementById('save-btn');
-    btn.disabled = true; btn.textContent = 'Saving...';
+    btn.disabled = true; btn.textContent = 'Saving…';
     try {
       const r = await fetch('/api/config', {
         method: 'PUT',
@@ -322,95 +515,26 @@
         }),
       });
       config = await r.json();
-      toast('Changes saved!');
+      toast('Changes saved');
     } catch { toast('Save failed — please try again.'); }
-    btn.disabled = false; btn.textContent = 'Save Changes';
+    btn.disabled = false; btn.textContent = 'Save changes';
   });
 
-  // Embed
-  function copyEmbed() {
-    const text = document.getElementById('embed-code-text').textContent;
-    navigator.clipboard.writeText(text).then(() => toast('Copied to clipboard!')).catch(() => {
-      const ta = document.createElement('textarea');
-      ta.value = text; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove();
-      toast('Copied!');
-    });
-  }
-
-  function openPreview() {
-    const agentId = config.agentId || 'dev';
-    window.open(`/chat-frame?agentId=${agentId}`, '_blank', 'width=420,height=620');
-  }
-
-  // Leads
-  function renderLeads(leads) {
-    const c = document.getElementById('leads-container');
-    if (!leads.length) {
-      c.innerHTML = '<div class="leads-empty"><div class="emoji">📭</div><div>No leads yet — your widget is ready to capture them!</div></div>';
-      return;
-    }
-    c.innerHTML = `
-      <table>
-        <thead><tr>
-          <th>Name</th><th>Email</th><th>Message</th><th>Date</th><th></th>
-        </tr></thead>
-        <tbody>
-          ${leads.map(l => `
-            <tr data-id="${l.id}">
-              <td class="lead-name">${escHtml(l.name)}</td>
-              <td class="lead-email"><a href="mailto:${escHtml(l.email)}">${escHtml(l.email)}</a></td>
-              <td class="lead-msg" title="${escHtml(l.message)}">${escHtml(l.message)}</td>
-              <td class="lead-time">${formatDate(l.timestamp)}</td>
-              <td><button class="btn btn-danger btn-sm" onclick="deleteLead('${l.id}')">Delete</button></td>
-            </tr>
-          `).join('')}
-        </tbody>
-      </table>
-    `;
-  }
-
-  function updateLeadBadge(leads) {
-    const badge = document.getElementById('lead-count-badge');
-    if (leads.length > 0) {
-      badge.textContent = leads.length;
-      badge.style.display = '';
-    } else {
-      badge.style.display = 'none';
-    }
-  }
-
-  function formatDate(iso) {
-    const d = new Date(iso);
-    return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) + ' ' +
-           d.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
-  }
-
-  async function deleteLead(id) {
-    if (!confirm('Delete this lead?')) return;
-    await fetch(`/api/leads/${id}`, { method: 'DELETE' });
-    config.leads = (config.leads || []).filter(l => l.id !== id);
-    renderLeads(config.leads);
-    updateLeadBadge(config.leads);
-    toast('Lead deleted');
-  }
-
-  // Generate FAQs with AI
+  // Generate FAQs
   async function generateFaqs() {
     const businessName = document.getElementById('businessName').value.trim();
     const description  = document.getElementById('description').value.trim();
     const services     = document.getElementById('services').value.trim();
+    const hint = document.getElementById('gen-hint');
 
-    if (!businessName && !description) {
-      document.getElementById('gen-hint').style.display = '';
-      return;
-    }
-    document.getElementById('gen-hint').style.display = 'none';
+    if (!businessName && !description) { hint.style.display = ''; return; }
+    hint.style.display = 'none';
 
-    const btn = document.getElementById('gen-btn');
-    const icon = document.getElementById('gen-icon');
+    const btn   = document.getElementById('gen-btn');
+    const icon  = document.getElementById('gen-icon');
+    const label = document.getElementById('gen-label');
     btn.disabled = true;
-    icon.textContent = '⏳';
-    btn.childNodes[1].textContent = ' Generating…';
+    icon.textContent = '⏳'; label.textContent = 'Generating…';
 
     try {
       const r = await fetch('/api/generate-faqs', {
@@ -420,22 +544,79 @@
       });
       const data = await r.json();
       if (data.error) throw new Error(data.error);
-
-      // Clear existing FAQs and populate with generated ones
       document.getElementById('faqs-list').innerHTML = '';
       (data.faqs || []).forEach(f => addFaq(f));
-      toast(`Generated ${data.faqs.length} FAQs — edit and save when ready!`, 3500);
+      toast(`Generated ${data.faqs.length} FAQs — edit and save when ready`);
     } catch (err) {
-      toast(err.message || 'Generation failed — please try again.');
+      toast(err.message || 'Generation failed');
     }
 
     btn.disabled = false;
-    icon.textContent = '✨';
-    btn.childNodes[1].textContent = ' Generate FAQs with AI';
+    icon.textContent = '✦'; label.textContent = 'Generate with AI';
+  }
+
+  // Embed copy
+  function copyEmbed() {
+    const text = document.getElementById('embed-code-text').textContent;
+    navigator.clipboard.writeText(text)
+      .then(() => toast('Copied to clipboard'))
+      .catch(() => { toast('Copy failed — select the code manually'); });
+  }
+
+  function openPreview() {
+    const agentId = config.agentId || 'dev';
+    window.open(`/chat-frame?agentId=${agentId}`, '_blank', 'width=400,height=620,resizable=yes');
+  }
+
+  // Leads
+  function renderLeads(leads) {
+    const c = document.getElementById('leads-container');
+    if (!leads.length) {
+      c.innerHTML = `<div class="leads-empty"><div class="leads-empty-icon">◎</div><p>No leads yet.<br>Your widget is live and ready to capture them.</p></div>`;
+      return;
+    }
+    c.innerHTML = `
+      <table>
+        <thead><tr>
+          <th>Name</th><th>Email</th><th>Message</th><th>Date</th><th></th>
+        </tr></thead>
+        <tbody>
+          ${leads.map(l => `
+            <tr>
+              <td class="lead-name">${escHtml(l.name)}</td>
+              <td class="lead-email"><a href="mailto:${escHtml(l.email)}">${escHtml(l.email)}</a></td>
+              <td class="lead-msg" title="${escHtml(l.message)}">${escHtml(l.message)}</td>
+              <td class="lead-time">${fmtDate(l.timestamp)}</td>
+              <td><button class="btn btn-danger" onclick="deleteLead('${l.id}')" style="font-size:11px;padding:5px 10px">Delete</button></td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    `;
+  }
+
+  function updateBadge(leads) {
+    const b = document.getElementById('lead-count-badge');
+    if (leads.length) { b.textContent = leads.length; b.style.display = ''; }
+    else b.style.display = 'none';
+  }
+
+  function fmtDate(iso) {
+    const d = new Date(iso);
+    return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
+      + ' ' + d.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+  }
+
+  async function deleteLead(id) {
+    if (!confirm('Delete this lead?')) return;
+    await fetch(`/api/leads/${id}`, { method: 'DELETE' });
+    config.leads = (config.leads || []).filter(l => l.id !== id);
+    renderLeads(config.leads);
+    updateBadge(config.leads);
+    toast('Lead deleted');
   }
 
   loadConfig();
 </script>
-
 </body>
 </html>
